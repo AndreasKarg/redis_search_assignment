@@ -10,3 +10,6 @@ crate-type = ["staticlib"]
 
 [features]
 trie_32_bit_runes = []
+
+[build-dependencies]
+bindgen = "0.73.2"

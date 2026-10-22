@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#include "trie_rs.h"
+#include "trie_rs_header_wrapper.h"
 
 int main(void)
 {
