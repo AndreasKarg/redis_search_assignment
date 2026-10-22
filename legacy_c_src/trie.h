@@ -147,6 +147,9 @@ int TrieNode_Delete(TrieNode *n, const rune *str, t_len len, TrieFreeCallback fr
 /* Free the trie's root and all its children recursively */
 void TrieNode_Free(TrieNode *n, TrieFreeCallback freecb);
 
+/* EXCLUDED as per task spec */
+#if 0
+
 /* trie iterator stack node. for internal use only */
 typedef struct {
   int state;
@@ -261,6 +264,7 @@ void TrieNode_IterateContains(TrieNode *n, const rune *str, int nstr, bool prefi
 
 void TrieNode_IterateWildcard(TrieNode *n, const rune *str, int nstr,
                               TrieRangeCallback callback, void *ctx, struct timespec *timeout);
+#endif
 
 #ifdef __cplusplus
 }

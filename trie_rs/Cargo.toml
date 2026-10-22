@@ -7,3 +7,6 @@ edition = "2024"
 crate-type = ["staticlib"]
 
 [dependencies]
+
+[features]
+trie_32_bit_runes = []
