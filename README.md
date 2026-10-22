@@ -25,6 +25,11 @@ I chose `cbindgen` over `cheadergen` for two reasons:
 * `corrosion` has a predefined function to wire the generator into a CMake project
 * `cheadergen`'s known limitations would have made the `TRIE_32_BIT_RUNES` compile-time switch harder to replicate
 
+### Testing
+
+In addition to the usual Rust-side unit tests, I would normally aim to test the C-side API through tests written and
+driven through C.
+
 ## Assumptions
 
 * `__trieNode_*` functions/macros are not part of the public API
@@ -59,4 +64,6 @@ Update: See assumptions
 
 * The C-side `Rune` type could be replaced with Rust `char`s internally.
 * If UTF-8 can be guaranteed for the actual payloads, the API could be refactored to operate on those.
-
+* I am not entirely happy with the way the root node is just another node. I feel like the API could do with a proper
+  `Trie` type as its root - even if it's just a thin wrapper around a node.
+* There's always more polishing to be done, especially with naming.
