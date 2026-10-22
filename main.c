@@ -17,8 +17,16 @@ int main(void)
     size_t runes_length;
     Rune *runes = strToRunes(payload, &runes_length);
 
-    // Note to reviewer: Casting `payload` to RSPayload just for the demo case
+    // Note to reviewer: Casting `char*` to RSPayload just for the demo case
     TrieNode_Add(&node, runes, runes_length, (RSPayload*)payload, 123.4f, ADD_INCR, free);
+
+    // Now get the payload back
+    char *retrieved_payload = (char*)TrieNode_GetValue(node, runes, runes_length, false);
+
+    printf("%s\n", retrieved_payload);
+
+    free(runes);
+
 
     return 0;
 }

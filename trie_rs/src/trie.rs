@@ -41,6 +41,10 @@ impl TrieNode {
             outcome: TrieAddOutcome::StringAdded,
         }
     }
+
+    pub fn get_value(&self, str: &[Rune]) -> Option<*mut RSPayload> {
+        self.fake_contents.borrow().get(str).map(|p| p.payload())
+    }
 }
 
 pub struct AddOutcome {

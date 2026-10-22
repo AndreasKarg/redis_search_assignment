@@ -3,7 +3,7 @@
 use crate::rune::Rune;
 use crate::trie::{RSPayload, TrieNode};
 use std::ffi::c_void;
-use std::ptr::NonNull;
+use std::ptr::{null, NonNull, null_mut};
 use std::slice;
 
 #[repr(transparent)]
@@ -95,6 +95,7 @@ pub unsafe extern "C" fn TrieNode_Add(
     // SAFETY: the caller guarantees a live node that nothing else uses.
     let instance = unsafe { Box::from_non_null(instance) };
 
+    // SAFETY: the caller guarantees a live array that nothing else uses.
     let str = NonNull::new(str as *mut _).unwrap();
     let str = unsafe { slice::from_raw_parts(str.as_ptr(), len.0 as usize) };
 
@@ -107,6 +108,40 @@ pub unsafe extern "C" fn TrieNode_Add(
     outcome.outcome
 }
 
+/// Returns the payload of the node, or NULL if the node was not found.
+///
+/// Note: If a node is found, but its assigned payload was NULL, the return value of this function
+///       does not distinguish between "NULL value found" and "no node found".
+///
+/// # SAFETY
+///
+/// * `n` must be a valid, non-null pointer to a node instance created through `TrieNode_New()`. No
+///    other call may use the same node for the duration of this one.
+/// * `str` and `len` must be a matching pointer/length encoded array of Runes. The runes are copied
+///    into the node. This means: **No** ownership is taken, and **no** reference is kept after the
+///    function call. It is the **caller's** responsibility to clean up the memory behind `str`.
+///    This may be done immediately after the call returns.
+/// * `str` must be non-null and aligned, even if `len` is zero.
+/// * `str` must not be modified for the duration of the call.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn TrieNode_GetValue(    n: *const TrieNode,
+                                        str: *const Rune,
+                                        len: t_len,
+                                        exact: bool) -> *mut RSPayload {
+    let instance = NonNull::new(n as *mut _).unwrap();
+
+    // SAFETY: the caller guarantees a live node that nothing else uses.
+    let instance: &TrieNode = unsafe { instance.as_ref() };
+
+    // SAFETY: the caller guarantees a live array that nothing else uses.
+    let str = NonNull::new(str as *mut _).unwrap();
+    let str = unsafe { slice::from_raw_parts(str.as_ptr(), len.0 as usize) };
+
+    let result = instance.get_value(str);
+
+    result.unwrap_or(null_mut())
+}
+
 pub struct OwnedPayload {
     raw: *mut RSPayload,
     freecb: TrieFreeCallback
@@ -115,6 +150,10 @@ pub struct OwnedPayload {
 impl OwnedPayload {
     fn new(raw: *mut RSPayload, freecb: TrieFreeCallback) -> Self {
         Self {raw, freecb}
+    }
+
+    pub fn payload(&self) -> *mut RSPayload {
+        self.raw
     }
 }
 

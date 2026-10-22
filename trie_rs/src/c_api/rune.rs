@@ -12,7 +12,7 @@ use crate::rune::{str_to_runes, Rune};
 ///   modified for the duration of the function.
 /// * `len` must be a valid, non-null pointer to a single value.
 #[unsafe(no_mangle)]
-pub extern "C" fn strToRunes(str: *const c_char, len: Option<NonNull<usize>>) -> NonNull<Rune>
+pub unsafe extern "C" fn strToRunes(str: *const c_char, len: Option<NonNull<usize>>) -> NonNull<Rune>
 {
     if str.is_null() {
         panic!("`str` must not be null");
