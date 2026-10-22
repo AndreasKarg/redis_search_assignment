@@ -31,7 +31,7 @@ pub enum TrieAddOutcome {
     StringAdded = 1,
 }
 
-pub type TrieFreeCallback = extern "C" fn(*mut c_void);
+pub type TrieFreeCallback = unsafe extern "C" fn(*mut c_void);
 
 /// Creates a new trie root node.
 ///
@@ -66,7 +66,8 @@ pub unsafe extern "C" fn TrieNode_New() -> NonNull<TrieNode> {
 /// * `payload` is treated as opaque by this library: It is assumed to be a valid pointer to a live
 ///    `RSPayload` instance. As the library does not interact with the payload, no further checks
 ///    are performed and it is the **caller's** responsibility to ensure that any retrieved payload
-///    is still valid and safe to use.
+///    is still valid and safe to use. The node **does take ownership** of `payload`: When a node
+///    goes out of scope, `freecb` is called to free up `payload`.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn TrieNode_Add(
     n: Option<NonNull<Option<NonNull<TrieNode>>>>,
@@ -97,9 +98,32 @@ pub unsafe extern "C" fn TrieNode_Add(
     let str = NonNull::new(str as *mut _).unwrap();
     let str = unsafe { slice::from_raw_parts(str.as_ptr(), len.0 as usize) };
 
-    let outcome = instance.add(str, payload, score, op, freecb);
+    let owned_payload = OwnedPayload::new(payload, freecb);
+
+    let outcome = instance.add(str, owned_payload, score, op);
     let new_node = outcome.node;
     *n = Some(Box::into_non_null(new_node));
 
     outcome.outcome
+}
+
+pub struct OwnedPayload {
+    raw: *mut RSPayload,
+    freecb: TrieFreeCallback
+}
+
+impl OwnedPayload {
+    fn new(raw: *mut RSPayload, freecb: TrieFreeCallback) -> Self {
+        Self {raw, freecb}
+    }
+}
+
+impl Drop for OwnedPayload {
+    fn drop(&mut self) {
+        // SAFETY: The use of `freecb` to free payload memory is enforced through TrieNode_Add's
+        // documentation
+        unsafe {
+            (self.freecb)(self.raw as *mut _)
+        }
+    }
 }
