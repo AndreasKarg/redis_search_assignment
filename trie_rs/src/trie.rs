@@ -42,7 +42,7 @@ impl TrieNode {
         }
     }
 
-    pub fn get_value(&self, str: &[Rune]) -> Option<*mut RSPayload> {
+    pub fn get_value(&self, str: &[Rune], _exact: bool) -> Option<*mut RSPayload> {
         self.fake_contents.borrow().get(str).map(|p| p.payload())
     }
 }

@@ -47,6 +47,23 @@ pub unsafe extern "C" fn TrieNode_New() -> NonNull<TrieNode> {
     Box::into_non_null(node)
 }
 
+/// Free the trie's root and all its children recursively
+///
+/// (Note to reviewer: It doesn't in this fake impl)
+///
+/// # SAFETY
+///
+/// * `n` must be a valid, non-null pointer to a node instance created through `TrieNode_New()`.
+/// * `n` will _not_ be in a valid state after this call and must not be used again.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn TrieNode_Free(n: Option<NonNull<TrieNode>>, _freecb: TrieFreeCallback) {
+    if let Some(n) = n {
+        // SAFETY: the caller guarantees a live node that nothing else uses.
+        let node = unsafe { Box::from_non_null(n) };
+        drop(node)
+    }
+}
+
 /// Add a new string to a trie.
 ///
 /// Returns: Whether a new string was actually added, or an existing entry's score updated
@@ -90,10 +107,10 @@ pub unsafe extern "C" fn TrieNode_Add(
     // SAFETY: the caller guarantees a live node that nothing else uses.
     let n = unsafe { n.unwrap().as_mut() };
 
-    let instance = n.take().unwrap();
+    let node = n.take().unwrap();
 
     // SAFETY: the caller guarantees a live node that nothing else uses.
-    let instance = unsafe { Box::from_non_null(instance) };
+    let node = unsafe { Box::from_non_null(node) };
 
     // SAFETY: the caller guarantees a live array that nothing else uses.
     let str = NonNull::new(str as *mut _).unwrap();
@@ -101,7 +118,7 @@ pub unsafe extern "C" fn TrieNode_Add(
 
     let owned_payload = OwnedPayload::new(payload, freecb);
 
-    let outcome = instance.add(str, owned_payload, score, op);
+    let outcome = node.add(str, owned_payload, score, op);
     let new_node = outcome.node;
     *n = Some(Box::into_non_null(new_node));
 
@@ -128,16 +145,16 @@ pub unsafe extern "C" fn TrieNode_GetValue(    n: *const TrieNode,
                                         str: *const Rune,
                                         len: t_len,
                                         exact: bool) -> *mut RSPayload {
-    let instance = NonNull::new(n as *mut _).unwrap();
+    let node = NonNull::new(n as *mut _).unwrap();
 
     // SAFETY: the caller guarantees a live node that nothing else uses.
-    let instance: &TrieNode = unsafe { instance.as_ref() };
+    let node: &TrieNode = unsafe { node.as_ref() };
 
     // SAFETY: the caller guarantees a live array that nothing else uses.
     let str = NonNull::new(str as *mut _).unwrap();
     let str = unsafe { slice::from_raw_parts(str.as_ptr(), len.0 as usize) };
 
-    let result = instance.get_value(str);
+    let result = node.get_value(str, exact);
 
     result.unwrap_or(null_mut())
 }

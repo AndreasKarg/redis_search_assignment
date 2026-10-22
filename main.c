@@ -25,8 +25,8 @@ int main(void)
 
     printf("%s\n", retrieved_payload);
 
-    free(runes);
-
+    runeFree(runes);
+    TrieNode_Free(node, free);
 
     return 0;
 }
