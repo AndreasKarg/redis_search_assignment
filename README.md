@@ -2,9 +2,28 @@
 
 ## Design notes
 
-The original C implementation seems to be using some clever macro logic to operate on monolithic node allocation blocks.
+### Thoughts on the legacy API
+
+The original C Trie implementation seems to be using some "clever" macro logic to operate on monolithic node allocation blocks.
 I have left this out of the new design: Each node lives in its own box. This is likely not the most performant solution,
 but it keeps the API reasonable and safe.
+
+The whole `rune_util` legacy module makes very little sense. A buffer type is declared but not really used. The string
+conversion functions operate on raw pointers/lengths. I ran out of time, but after replicating the original C API,
+I would likely aim to refactor the entire Runes module into something that operates on an opaque `Runes` type (in turn holding
+something like a `Vec<char>`). -> No more passing around separate ptr/len parameters, much cleaner memory management, etc.
+
+Once a reasonable API exists for runes & the trie, performance optimisations could be made as needed.
+
+There might not even be a requirement to interact with runes on the C side at all: If it is feasible to treat them as
+an implementation detail, then the C API for the whole trie would just run on C strings.
+
+### `cbindgen` vs `cheadergen`
+
+I chose `cbindgen` over `cheadergen` for two reasons:
+
+* `corrosion` has a predefined function to wire the generator into a CMake project
+* `cheadergen`'s known limitations would have made the `TRIE_32_BIT_RUNES` compile-time switch harder to replicate
 
 ## Assumptions
 
@@ -15,21 +34,16 @@ but it keeps the API reasonable and safe.
   * Allocation happens C-side.
   * De-allocation is assumed to be what `TrieFreeCallback` is for.
 
-## Notes
-
-I chose `cbindgen` over `cheadergen` for two reasons:
-
-* `corrosion` has a predefined function to wire the generator into a CMake project
-* `cheadergen`'s known limitations would have made the `TRIE_32_BIT_RUNES` compile-time switch harder to replicate
-
 ## Open Questions
 
 ### How to create the root node?
 
-Without digging further into the lib, there is no obvious way to generate the root node. C's `TrieNode_Add` implementation
-assumes a valid pointer to an initialised `TrieNode` struct.
+~~Without digging further into the lib, there is no obvious way to generate the root node. C's `TrieNode_Add` implementation
+assumes a valid pointer to an initialised `TrieNode` struct.~~
 
-I have chosen to leave this gap unfilled in the Rust-side C API for now.
+~~I have chosen to leave this gap unfilled in the Rust-side C API for now.~~
+
+Update: I have added a `TrieNode_New` function.
 
 ### The `RSPayload` struct
 

@@ -23,7 +23,7 @@ impl TrieNode {
     // * The operation is infallible
     pub fn add(self: Box<Self>, str: &[Rune], payload: *mut RSPayload, score: f32, op: TrieAddOp, freecb: TrieFreeCallback) -> AddOutcome {
         // Stub impl
-        
+
         AddOutcome {
             node: self,
             outcome: TrieAddOutcome::StringAdded,
@@ -34,4 +34,9 @@ impl TrieNode {
 pub struct AddOutcome {
     pub node: Box<TrieNode>,
     pub outcome: TrieAddOutcome
+}
+
+#[cfg(test)]
+mod tests {
+    // Imagine a thorough suite of unittests here, built up through TDD
 }

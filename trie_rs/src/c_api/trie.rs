@@ -68,7 +68,6 @@ pub unsafe extern "C" fn TrieNode_New() -> NonNull<TrieNode> {
 ///    are performed and it is the **caller's** responsibility to ensure that any retrieved payload
 ///    is still valid and safe to use.
 #[unsafe(no_mangle)]
-#[expect(unused_variables)]
 pub unsafe extern "C" fn TrieNode_Add(
     n: Option<NonNull<Option<NonNull<TrieNode>>>>,
     str: *const Rune,
@@ -76,7 +75,7 @@ pub unsafe extern "C" fn TrieNode_Add(
     payload: *mut RSPayload,
     score: f32,
     op: TrieAddOp,
-    freecb: Option<NonNull<TrieFreeCallback>>,
+    freecb: TrieFreeCallback,
 ) -> TrieAddOutcome {
     // Notes for reviewer:
     // Rust's current `NonNull` implementation assumes that everything can and should be mutable.
@@ -86,8 +85,6 @@ pub unsafe extern "C" fn TrieNode_Add(
     //    the invariant won't leak.
     // -> `payload` is considered arbitrary, with no invariants imposed, and therefore also taken as a
     //    plain pointer.
-    // -> `freecb`, being a function pointer, is assumed to be trivially `*const`,
-    //    with no special intent communication required.
 
     // SAFETY: the caller guarantees a live node that nothing else uses.
     let n = unsafe { n.unwrap().as_mut() };
@@ -97,11 +94,10 @@ pub unsafe extern "C" fn TrieNode_Add(
     // SAFETY: the caller guarantees a live node that nothing else uses.
     let instance = unsafe { Box::from_non_null(instance) };
 
-    let freecb = unsafe { freecb.unwrap().as_ref() };
+    let str = NonNull::new(str as *mut _).unwrap();
+    let str = unsafe { slice::from_raw_parts(str.as_ptr(), len.0 as usize) };
 
-    let str = unsafe { slice::from_raw_parts(str, len.0 as usize) };
-
-    let outcome = instance.add(str, payload, score, op, *freecb);
+    let outcome = instance.add(str, payload, score, op, freecb);
     let new_node = outcome.node;
     *n = Some(Box::into_non_null(new_node));
 

@@ -6,8 +6,19 @@
 
 int main(void)
 {
+    TrieNode *node = TrieNode_New();
+
     uint64_t sum = add(35, 7);
 
-    printf("The sum is: %" PRId64 "\n", sum);
+    const size_t payload_len = 128;
+    char *payload = malloc(payload_len);
+    sprintf_s(payload, payload_len, "The sum is: %" PRId64 "\n", sum);
+
+    size_t runes_length;
+    Rune *runes = strToRunes(payload, &runes_length);
+
+    // Note to reviewer: Casting `payload` to RSPayload just for the demo case
+    TrieNode_Add(&node, runes, runes_length, (RSPayload*)payload, 123.4f, ADD_INCR, free);
+
     return 0;
 }
