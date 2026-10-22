@@ -1,7 +1,13 @@
+#include <stdint.h>
 #include <stdio.h>
+#include <inttypes.h>
+
+#include "trie_rs.h"
 
 int main(void)
 {
-    printf("Hello, World!\n");
+    uint64_t sum = add(35, 7);
+
+    printf("The sum is: %" PRId64 "\n", sum);
     return 0;
 }

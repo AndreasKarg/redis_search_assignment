@@ -11,6 +11,11 @@ CPMAddPackage(
 )
 
 corrosion_import_crate(MANIFEST_PATH trie_rs/Cargo.toml)
+corrosion_experimental_cbindgen(
+        TARGET trie_rs
+        HEADER_NAME trie_rs.h
+        FLAGS "--lang" "c"
+)
 
 add_executable(redis_search_assignment main.c)
 target_link_libraries(redis_search_assignment trie_rs)
