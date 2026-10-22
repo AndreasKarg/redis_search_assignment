@@ -1,2 +1,8 @@
+# CMake artefacts
 cmake-build*
+
+# IntelliJ project files
 .idea
+
+# Rust build artefacts
+**/target/
