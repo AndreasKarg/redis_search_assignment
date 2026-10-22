@@ -1,6 +1,6 @@
+pub mod c_api;
 pub mod rune;
 pub mod trie;
-pub mod c_api;
 
 #[unsafe(no_mangle)]
 pub extern "C" fn add(left: u64, right: u64) -> u64 {

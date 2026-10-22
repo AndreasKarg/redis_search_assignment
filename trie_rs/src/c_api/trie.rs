@@ -3,7 +3,7 @@
 use crate::rune::Rune;
 use crate::trie::{RSPayload, TrieNode};
 use std::ffi::c_void;
-use std::ptr::{null, NonNull, null_mut};
+use std::ptr::{NonNull, null, null_mut};
 use std::slice;
 
 #[repr(transparent)]
@@ -141,10 +141,12 @@ pub unsafe extern "C" fn TrieNode_Add(
 /// * `str` must be non-null and aligned, even if `len` is zero.
 /// * `str` must not be modified for the duration of the call.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn TrieNode_GetValue(    n: *const TrieNode,
-                                        str: *const Rune,
-                                        len: t_len,
-                                        exact: bool) -> *mut RSPayload {
+pub unsafe extern "C" fn TrieNode_GetValue(
+    n: *const TrieNode,
+    str: *const Rune,
+    len: t_len,
+    exact: bool,
+) -> *mut RSPayload {
     let node = NonNull::new(n as *mut _).unwrap();
 
     // SAFETY: the caller guarantees a live node that nothing else uses.
@@ -161,12 +163,12 @@ pub unsafe extern "C" fn TrieNode_GetValue(    n: *const TrieNode,
 
 pub struct OwnedPayload {
     raw: *mut RSPayload,
-    freecb: TrieFreeCallback
+    freecb: TrieFreeCallback,
 }
 
 impl OwnedPayload {
     fn new(raw: *mut RSPayload, freecb: TrieFreeCallback) -> Self {
-        Self {raw, freecb}
+        Self { raw, freecb }
     }
 
     pub fn payload(&self) -> *mut RSPayload {
@@ -178,8 +180,6 @@ impl Drop for OwnedPayload {
     fn drop(&mut self) {
         // SAFETY: The use of `freecb` to free payload memory is enforced through TrieNode_Add's
         // documentation
-        unsafe {
-            (self.freecb)(self.raw as *mut _)
-        }
+        unsafe { (self.freecb)(self.raw as *mut _) }
     }
 }

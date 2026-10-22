@@ -1,8 +1,8 @@
+use crate::c_api::trie::{OwnedPayload, TrieAddOp, TrieAddOutcome, TrieFreeCallback};
+use crate::rune::Rune;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
-use crate::c_api::trie::{OwnedPayload, TrieAddOp, TrieAddOutcome, TrieFreeCallback};
-use crate::rune::Rune;
 
 /// RSPayload is assumed to be opaque and managed entirely on the C side.
 pub struct RSPayload;
@@ -13,13 +13,15 @@ pub struct RSPayload;
 /// trie.
 #[derive(Clone)]
 pub struct TrieNode {
-    fake_contents: Rc<RefCell<HashMap<Vec<Rune>, OwnedPayload>>>
+    fake_contents: Rc<RefCell<HashMap<Vec<Rune>, OwnedPayload>>>,
 }
 
 impl TrieNode {
     /// Create a new root Trie node.
-    pub fn new() -> Box<Self>{
-        Box::new(Self { fake_contents: Rc::new(RefCell::new(HashMap::new()))})
+    pub fn new() -> Box<Self> {
+        Box::new(Self {
+            fake_contents: Rc::new(RefCell::new(HashMap::new())),
+        })
     }
 
     // Assumptions:
@@ -27,7 +29,13 @@ impl TrieNode {
     //   (inferred to be an array of runes from the signature of `__newTrieNode`)
     // * The payload is a single item
     // * The operation is infallible
-    pub fn add(self: Box<Self>, str: &[Rune], payload: OwnedPayload, _score: f32, _op: TrieAddOp) -> AddOutcome {
+    pub fn add(
+        self: Box<Self>,
+        str: &[Rune],
+        payload: OwnedPayload,
+        _score: f32,
+        _op: TrieAddOp,
+    ) -> AddOutcome {
         // Fake impl
         let str = str.to_vec();
         self.fake_contents.borrow_mut().insert(str, payload);
@@ -49,7 +57,7 @@ impl TrieNode {
 
 pub struct AddOutcome {
     pub node: Box<TrieNode>,
-    pub outcome: TrieAddOutcome
+    pub outcome: TrieAddOutcome,
 }
 
 #[cfg(test)]

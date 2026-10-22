@@ -1,8 +1,8 @@
 #![allow(nonstandard_style)]
 
-use std::ffi::{c_char, CStr};
+use crate::rune::{Rune, str_to_runes};
+use std::ffi::{CStr, c_char};
 use std::ptr::NonNull;
-use crate::rune::{str_to_runes, Rune};
 
 /// Convert a utf-8 string to constant width runes.
 ///
@@ -14,8 +14,10 @@ use crate::rune::{str_to_runes, Rune};
 ///   modified for the duration of the function.
 /// * `len` must be a valid, non-null pointer to a single value.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn strToRunes(str: *const c_char, len: Option<NonNull<usize>>) -> NonNull<Rune>
-{
+pub unsafe extern "C" fn strToRunes(
+    str: *const c_char,
+    len: Option<NonNull<usize>>,
+) -> NonNull<Rune> {
     if str.is_null() {
         panic!("`str` must not be null");
     }
