@@ -17,6 +17,5 @@ corrosion_experimental_cbindgen(
         FLAGS "--config" "cbindgen.toml"
 )
 
-add_executable(redis_search_assignment main.c
-        trie_rs_header_wrapper.h)
+add_executable(redis_search_assignment main.c)
 target_link_libraries(redis_search_assignment trie_rs)
