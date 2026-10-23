@@ -12,7 +12,7 @@ int main(void)
 
     const size_t payload_len = 128;
     char *payload = malloc(payload_len);
-    sprintf_s(payload, payload_len, "The sum is: %" PRId64 "\n", sum);
+    snprintf(payload, payload_len, "The sum is: %" PRId64 "\n", sum);
 
     size_t runes_length;
     Rune *runes = strToRunes(payload, &runes_length);

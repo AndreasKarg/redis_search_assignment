@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.3)
+cmake_minimum_required(VERSION 3.22)
 project(redis_search_assignment C)
 
 set(CMAKE_C_STANDARD 23)
