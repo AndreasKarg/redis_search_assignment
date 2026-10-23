@@ -1,5 +1,3 @@
-use std::ffi::CStr;
-
 #[cfg(feature = "trie_32_bit_runes")]
 #[repr(transparent)]
 #[derive(Clone, Eq, Hash, PartialEq)]

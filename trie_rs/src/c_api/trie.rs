@@ -3,7 +3,7 @@
 use crate::rune::Rune;
 use crate::trie::{RSPayload, TrieNode};
 use std::ffi::c_void;
-use std::ptr::{NonNull, null, null_mut};
+use std::ptr::{NonNull, null_mut};
 use std::slice;
 
 #[repr(transparent)]
@@ -17,6 +17,7 @@ pub enum TrieAddOp {
     ADD_INCR,
 }
 
+#[expect(clippy::empty_line_after_doc_comments)]
 /// Matches the original C implementation's return value for `TrieNode_Add`:
 ///
 /// 1 if the string did not exist there, or 0 if we just replaced the score.
@@ -35,7 +36,7 @@ pub type TrieFreeCallback = unsafe extern "C" fn(*mut c_void);
 
 /// Creates a new trie root node.
 ///
-/// SAFETY:
+/// # SAFETY
 /// You can freely pass the returned pointer to `TrieNode_*` functions.
 ///
 /// All of its memory management is handled through the Rust library.
@@ -73,18 +74,18 @@ pub unsafe extern "C" fn TrieNode_Free(n: Option<NonNull<TrieNode>>, _freecb: Tr
 /// # SAFETY
 ///
 /// * `n` must be a valid, non-null pointer to a node instance created through `TrieNode_New()`. No
-///    other call may use the same node for the duration of this one.
+///   other call may use the same node for the duration of this one.
 /// * `str` and `len` must be a matching pointer/length encoded array of Runes. The runes are copied
-///    into the node. This means: **No** ownership is taken, and **no** reference is kept after the
-///    function call. It is the **caller's** responsibility to clean up the memory behind `str`.
-///    This may be done immediately after the call returns.
+///   into the node. This means: **No** ownership is taken, and **no** reference is kept after the
+///   function call. It is the **caller's** responsibility to clean up the memory behind `str`.
+///   This may be done immediately after the call returns.
 /// * `str` must be non-null and aligned, even if `len` is zero.
 /// * `str` must not be modified for the duration of the call.
 /// * `payload` is treated as opaque by this library: It is assumed to be a valid pointer to a live
-///    `RSPayload` instance. As the library does not interact with the payload, no further checks
-///    are performed and it is the **caller's** responsibility to ensure that any retrieved payload
-///    is still valid and safe to use. The node **does take ownership** of `payload`: When a node
-///    goes out of scope, `freecb` is called to free up `payload`.
+///   `RSPayload` instance. As the library does not interact with the payload, no further checks
+///   are performed and it is the **caller's** responsibility to ensure that any retrieved payload
+///   is still valid and safe to use. The node **does take ownership** of `payload`: When a node
+///   goes out of scope, `freecb` is called to free up `payload`.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn TrieNode_Add(
     n: Option<NonNull<Option<NonNull<TrieNode>>>>,
@@ -133,11 +134,11 @@ pub unsafe extern "C" fn TrieNode_Add(
 /// # SAFETY
 ///
 /// * `n` must be a valid, non-null pointer to a node instance created through `TrieNode_New()`. No
-///    other call may use the same node for the duration of this one.
+///   other call may use the same node for the duration of this one.
 /// * `str` and `len` must be a matching pointer/length encoded array of Runes. The runes are copied
-///    into the node. This means: **No** ownership is taken, and **no** reference is kept after the
-///    function call. It is the **caller's** responsibility to clean up the memory behind `str`.
-///    This may be done immediately after the call returns.
+///   into the node. This means: **No** ownership is taken, and **no** reference is kept after the
+///   function call. It is the **caller's** responsibility to clean up the memory behind `str`.
+///   This may be done immediately after the call returns.
 /// * `str` must be non-null and aligned, even if `len` is zero.
 /// * `str` must not be modified for the duration of the call.
 #[unsafe(no_mangle)]

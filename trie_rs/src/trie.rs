@@ -1,4 +1,4 @@
-use crate::c_api::trie::{OwnedPayload, TrieAddOp, TrieAddOutcome, TrieFreeCallback};
+use crate::c_api::trie::{OwnedPayload, TrieAddOp, TrieAddOutcome};
 use crate::rune::Rune;
 use std::cell::RefCell;
 use std::collections::HashMap;
